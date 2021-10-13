@@ -171,6 +171,7 @@ export class AppConfigService extends AppConfig {
             search,
             region,
             geneLinks,
+            geneRegionLinks,
             familyTreeLink,
             macroColors,
             ...rest
@@ -185,6 +186,7 @@ export class AppConfigService extends AppConfig {
           search,
           region,
           geneLinks,
+          geneRegionLinks,
           familyTreeLink,
           macroColors,
         } as Server;
