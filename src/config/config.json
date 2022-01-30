@@ -51,7 +51,7 @@
       },
       "microSearch": {
         "type": "GRPC",
-        "url": "http://localhost/gcv/microservices/micro-synteny-search/grpc-web"
+        "url": "http://gcv.legumeinfo.org/gcv/microservices/micro-synteny-search/grpc-web"
       },
       "geneLinks": {
         "type": "GET",
@@ -63,23 +63,23 @@
       },
       "chromosome": {
         "type": "GRPC",
-        "url": "http://localhost/gcv/microservices/chromosome/grpc-web"
+        "url": "http://gcv.legumeinfo.org/gcv/microservices/chromosome/grpc-web"
       },
       "genes": {
         "type": "POST",
-        "url": "http://localhost/gcv/microservices/genes"
+        "url": "http://gcv.legumeinfo.org/gcv/microservices/genes"
       },
       "blocks": {
         "type": "GRPC",
-        "url": "http://localhost/gcv/microservices/macro-synteny-blocks/grpc-web"
+        "url": "http://gcv.legumeinfo.org/gcv/microservices/macro-synteny-blocks/grpc-web"
       },
       "search": {
         "type": "GRPC",
-        "url": "http://localhost/gcv/microservices/search/grpc-web"
+        "url": "http://gcv.legumeinfo.org/gcv/microservices/search/grpc-web"
       },
       "region": {
         "type": "GRPC",
-        "url": "http://localhost/gcv/microservices/chromosome-region/grpc-web"
+        "url": "http://gcv.legumeinfo.org/gcv/microservices/chromosome-region/grpc-web"
       }
     }
   ]

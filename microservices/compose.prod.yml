@@ -20,9 +20,10 @@ services:
 
 
   envoy:
-    image: envoyproxy/envoy:v1.14.1
-    volumes:
-      - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml
+    build:
+      context: microservices/envoy
+      dockerfile: ../Dockerfile
+      target: envoy
     environment:
       loglevel: error
     labels:
@@ -33,19 +34,23 @@ services:
       - "traefik.http.routers.envoy.entrypoints=web"
 
   redisearch:
-    image: redislabs/redisearch:2.0.5
+    image: redislabs/redisearch:2.0.15
     healthcheck:
       test: "redis-cli ping"
     expose:
       - "6379"
+    # use anonymous volume so "docker compoose up --renew-anon-volumes" in
+    # deployment github action workflow causes it to be recreated
     volumes:
-      - ./data/redis:/data:rw
+      - /data
 
   chromosome:
     image: ghcr.io/legumeinfo/microservices-chromosome:1.0.0
     depends_on:
       redisearch:
         condition: service_healthy
+      redis_loader:
+        condition: service_completed_successfully
     environment:
       REDIS_HOST: redisearch
       HTTP_HOST: "0.0.0.0"
@@ -68,6 +73,8 @@ services:
     depends_on:
       redisearch:
         condition: service_healthy
+      redis_loader:
+        condition: service_completed_successfully
     environment:
       REDIS_HOST: redisearch
       GRPC_HOST: "0.0.0.0"
@@ -82,6 +89,8 @@ services:
     depends_on:
       redisearch:
         condition: service_healthy
+      redis_loader:
+        condition: service_completed_successfully
     environment:
       REDIS_HOST: redisearch
       HTTP_HOST: "0.0.0.0"
@@ -104,6 +113,8 @@ services:
     depends_on:
       redisearch:
         condition: service_healthy
+      redis_loader:
+        condition: service_completed_successfully
     environment:
       REDIS_HOST: redisearch
       HTTP_HOST: "0.0.0.0"
@@ -126,6 +137,8 @@ services:
     depends_on:
       redisearch:
         condition: service_healthy
+      redis_loader:
+        condition: service_completed_successfully
     environment:
       REDIS_HOST: redisearch
       GRPC_HOST: "0.0.0.0"
@@ -142,6 +155,8 @@ services:
         condition: service_healthy
       pairwise_macro_synteny_blocks:
         condition: service_started
+      redis_loader:
+        condition: service_completed_successfully
     environment:
       REDIS_HOST: redisearch
       HTTP_HOST: "0.0.0.0"
@@ -165,6 +180,8 @@ services:
     depends_on:
       redisearch:
         condition: service_healthy
+      redis_loader:
+        condition: service_completed_successfully
     environment:
       REDIS_HOST: redisearch
       HTTP_HOST: "0.0.0.0"
@@ -187,6 +204,8 @@ services:
     depends_on:
       redisearch:
         condition: service_healthy
+      redis_loader:
+        condition: service_completed_successfully
     environment:
       REDIS_HOST: redisearch
       GRPC_HOST: "0.0.0.0"
@@ -225,10 +244,9 @@ services:
       - "traefik.http.routers.search.entrypoints=web"
 
   redis_loader:
-    image: ghcr.io/legumeinfo/microservices-redis_loader:1.0.0
+    build: microservices/redis_loader
     depends_on:
       redisearch:
         condition: service_healthy
     environment:
       REDIS_HOST: redisearch
-    profiles: [redis_loader]
