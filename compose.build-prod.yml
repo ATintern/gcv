@@ -3,10 +3,9 @@ services:
     build:
       context: .
       target: prod
-    ports:
-      - "4200:80"
-    volumes:
-      - .:/gcv
-      - /gcv/dep
-      - /gcv/scripts
     restart: always
+    labels:
+      - "traefik.zone=${COMPOSE_PROJECT_NAME}"
+      - "traefik.enable=true"
+      - "traefik.http.routers.gcv.rule=Host(`${DOMAIN}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.gcv.entrypoints=web"
