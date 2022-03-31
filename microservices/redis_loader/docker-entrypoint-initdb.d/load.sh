@@ -2,6 +2,26 @@
 
 set -o errexit -o pipefail
 
+#cannot get this to work via the pipe strategy due apparently to wget terminating the connection prematurely and consistently when the wget is performed in a pipeline as all others. For whtever reason, it seems to work this way- weird!
+echo "cajca.ICPL87119.gnm1.ann1"
+wget https://data.legumeinfo.org/Cajanus/cajan/annotations/ICPL87119.gnm1.ann1.Y27M/cajca.ICPL87119.gnm1.ann1.Y27M.gene_models_main.gff3.gz
+wget -O - https://data.legumeinfo.org/Cajanus/cajan/genomes/ICPL87119.gnm1.SBGP/cajca.ICPL87119.gnm1.SBGP.genome_main.fna.gz.fai |
+  awk ' BEGIN { FS=OFS="\t"; print "##gff-version 3" }
+        {
+            print $1, ".", $1 ~ /Cc[0-9][0-9]/ ? "chromosome" : "supercontig", 
+                   1, $2, ".", ".", ".", "ID=" $1 ";" "Name=" $1 
+        }' | 
+    python -u -m redis_loader --load-type append gff \
+           --genus Cajanus \
+           --species cajan \
+           --strain ICPL87119 \
+           --gene-gff <(zcat cajca.ICPL87119.gnm1.ann1.Y27M.gene_models_main.gff3.gz | awk 'BEGIN {FS="\t"} $3=="gene" {print}') \
+           --gfa https://data.legumeinfo.org/Cajanus/cajan/annotations/ICPL87119.gnm1.ann1.Y27M/cajca.ICPL87119.gnm1.ann1.Y27M.legfed_v1_0.M65K.gfa.tsv.gz \
+           --chromosome-gff /dev/stdin
+#           --gene-gff <(wget -O - https://data.legumeinfo.org/Cajanus/cajan/annotations/ICPL87119.gnm1.ann1.Y27M/cajca.ICPL87119.gnm1.ann1.Y27M.gene_models_main.gff3.gz | zcat | awk 'BEGIN {FS="\t"} $3=="gene" {print}') \
+rm cajca.ICPL87119.gnm1.ann1.Y27M.gene_models_main.gff3.gz
+
+
 echo "aesev.CIAT22838.gnm1.ann1"
 wget -O - https://data.legumeinfo.org/Aeschynomene/evenia/genomes/CIAT22838.gnm1.XF73/aesev.CIAT22838.gnm1.XF73.genome_main.fna.gz.fai |
   awk ' BEGIN { FS=OFS="\t"; print "##gff-version 3" }
@@ -63,21 +83,6 @@ wget -O - https://data.legumeinfo.org/Arachis/ipaensis/genomes/K30076.gnm1.bXJ8/
            --gene-gff <(wget -O - https://data.legumeinfo.org/Arachis/ipaensis/annotations/K30076.gnm1.ann1.J37m/araip.K30076.gnm1.ann1.J37m.gene_models_main.gff3.gz | zcat | awk 'BEGIN {FS="\t"} $3=="gene" {print}') \
            --gfa https://data.legumeinfo.org/Arachis/ipaensis/annotations/K30076.gnm1.ann1.J37m/araip.K30076.gnm1.ann1.J37m.legfed_v1_0.M65K.gfa.tsv.gz \
            --chromosome-gff /dev/stdin
-
-#echo "cajca.ICPL87119.gnm1.ann1"
-#wget -O - https://data.legumeinfo.org/Cajanus/cajan/genomes/ICPL87119.gnm1.SBGP/cajca.ICPL87119.gnm1.SBGP.genome_main.fna.gz.fai |
-#  awk ' BEGIN { FS=OFS="\t"; print "##gff-version 3" }
-#        {
-#            print $1, ".", $1 ~ /Cc[0-9][0-9]/ ? "chromosome" : "supercontig", 
-#                   1, $2, ".", ".", ".", "ID=" $1 ";" "Name=" $1 
-#        }' | 
-#    python -u -m redis_loader --load-type append gff \
-#           --genus Cajanus \
-#           --species cajan \
-#           --strain ICPL87119 \
-#           --gene-gff <(wget -O - https://data.legumeinfo.org/Cajanus/cajan/annotations/ICPL87119.gnm1.ann1.Y27M/cajca.ICPL87119.gnm1.ann1.Y27M.gene_models_main.gff3.gz | zcat | awk 'BEGIN {FS="\t"} $3=="gene" {print}') \
-#           --gfa https://data.legumeinfo.org/Cajanus/cajan/annotations/ICPL87119.gnm1.ann1.Y27M/cajca.ICPL87119.gnm1.ann1.Y27M.legfed_v1_0.M65K.gfa.tsv.gz \
-#           --chromosome-gff /dev/stdin
 
 echo "cicar.CDCFrontier.gnm1.ann1"
 wget -O - https://data.legumeinfo.org/Cicer/arietinum/genomes/CDCFrontier.gnm1.GkHc/cicar.CDCFrontier.gnm1.GkHc.genome_main.fna.gz.fai |
@@ -407,6 +412,56 @@ wget -O - https://data.legumeinfo.org/Vigna/unguiculata/genomes/IT97K-499-35.gnm
            --strain IT97K-499-35 \
            --gene-gff <(wget -O - https://data.legumeinfo.org/Vigna/unguiculata/annotations/IT97K-499-35.gnm1.ann2.FD7K/vigun.IT97K-499-35.gnm1.ann2.FD7K.gene_models_main.gff3.gz | zcat | awk 'BEGIN {FS="\t"} $3=="gene" {print}') \
            --gfa https://data.legumeinfo.org/Vigna/unguiculata/annotations/IT97K-499-35.gnm1.ann2.FD7K/vigun.IT97K-499-35.gnm1.ann2.FD7K.legfed_v1_0.M65K.gfa.tsv.gz \
+           --chromosome-gff /dev/stdin
+
+
+#genomes included because they are grandfathered by trees begin here
+#Vigna unguiculata- this one is hard because it is a new annotation on the same genome and will cause genome id collisions
+echo "vigun.IT97K-499-35.gnm1.ann1"
+wget -O - https://data.legumeinfo.org/Vigna/unguiculata/genomes/IT97K-499-35.gnm1.QnBW/vigun.IT97K-499-35.gnm1.QnBW.genome_main.fna.gz.fai |
+  awk ' BEGIN { FS=OFS="\t"; print "##gff-version 3" }
+        {
+            #hack to make this distinct from the version used for ann2; same hack appears below for gff
+            sub("gnm1","gnm1.ann1",$1)
+            print $1, ".", $1 ~ /Vu[0-9][0-9]/ ? "chromosome" : "supercontig", 
+                   1, $2, ".", ".", ".", "ID=" $1 ";" "Name=" $1 
+        }' | 
+    python -u -m redis_loader --load-type append gff \
+           --genus Vigna \
+           --species unguiculata \
+           --strain IT97K-499-35 \
+           --gene-gff <(wget -O - https://data.legumeinfo.org/Vigna/unguiculata/annotations/IT97K-499-35.gnm1.ann1.zb5D/vigun.IT97K-499-35.gnm1.ann1.zb5D.gene_models_main.gff3.gz | zcat | awk 'BEGIN {OFS=FS="\t"} $3=="gene" {sub("gnm1","gnm1.ann1",$1); print}') \
+           --gfa https://data.legumeinfo.org/Vigna/unguiculata/annotations/IT97K-499-35.gnm1.ann1.zb5D/vigun.IT97K-499-35.gnm1.ann1.zb5D.legfed_v1_0.M65K.gfa.tsv.gz \
+           --chromosome-gff /dev/stdin
+
+echo "glyma.Wm82.gnm2.ann1"
+wget -O - https://data.legumeinfo.org/Glycine/max/genomes/Wm82.gnm2.DTC4/glyma.Wm82.gnm2.DTC4.genome_main.fna.gz.fai |
+  awk ' BEGIN { FS=OFS="\t"; print "##gff-version 3" }
+        {
+            print $1, ".", $1 ~ /Gm[0-9][0-9]/ ? "chromosome" : "supercontig", 
+                   1, $2, ".", ".", ".", "ID=" $1 ";" "Name=" $1 
+        }' | 
+    python -u -m redis_loader --load-type append gff \
+           --genus Glycine \
+           --species max \
+           --strain Wm82 \
+           --gene-gff <(wget -O - https://data.legumeinfo.org/Glycine/max/annotations/Wm82.gnm2.ann1.RVB6/glyma.Wm82.gnm2.ann1.RVB6.gene_models_main.gff3.gz | zcat | awk 'BEGIN {FS="\t"} $3=="gene" {print}') \
+           --gfa https://data.legumeinfo.org/Glycine/max/annotations/Wm82.gnm2.ann1.RVB6/glyma.Wm82.gnm2.ann1.RVB6.legfed_v1_0.M65K.gfa.tsv.gz \
+           --chromosome-gff /dev/stdin
+
+echo "phavu.G19833.gnm1.ann1"
+wget -O - https://data.legumeinfo.org/Phaseolus/vulgaris/genomes/G19833.gnm1.zBnF/phavu.G19833.gnm1.zBnF.genome_main.fna.gz.fai |
+  awk ' BEGIN { FS=OFS="\t"; print "##gff-version 3" }
+        {
+            print $1, ".", $1 ~ /Chr[0-9][0-9]$/ ? "chromosome" : "supercontig", 
+                   1, $2, ".", ".", ".", "ID=" $1 ";" "Name=" $1 
+        }' | 
+    python -u -m redis_loader --load-type append gff \
+           --genus Phaseolus \
+           --species vulgaris \
+           --strain G19833 \
+           --gene-gff <(wget -O - https://data.legumeinfo.org/Phaseolus/vulgaris/annotations/G19833.gnm1.ann1.pScz/phavu.G19833.gnm1.ann1.pScz.gene_models_main.gff3.gz | zcat | awk 'BEGIN {FS="\t"} $3=="gene" {print}') \
+           --gfa https://data.legumeinfo.org/Phaseolus/vulgaris/annotations/G19833.gnm1.ann1.pScz/phavu.G19833.gnm1.ann1.pScz.legfed_v1_0.M65K.gfa.tsv.gz \
            --chromosome-gff /dev/stdin
 
 echo "exit status: $?"
