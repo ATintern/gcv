@@ -449,6 +449,21 @@ wget -O - https://data.legumeinfo.org/Glycine/max/genomes/Wm82.gnm2.DTC4/glyma.W
            --gfa https://data.legumeinfo.org/Glycine/max/annotations/Wm82.gnm2.ann1.RVB6/glyma.Wm82.gnm2.ann1.RVB6.legfed_v1_0.M65K.gfa.tsv.gz \
            --chromosome-gff /dev/stdin
 
+echo "medtr.A17_HM341.gnm4.ann2"
+wget -O - https://data.legumeinfo.org/Medicago/truncatula/genomes/A17_HM341.gnm4.2GZ9/medtr.A17_HM341.gnm4.2GZ9.genome_main.fna.gz.fai |
+  awk ' BEGIN { FS=OFS="\t"; print "##gff-version 3" }
+        {
+            print $1, ".", $1 ~ /chr[1-8]/ ? "chromosome" : "supercontig", 
+                   1, $2, ".", ".", ".", "ID=" $1 ";" "Name=" $1 
+        }' | 
+    python -u -m redis_loader --load-type append gff \
+           --genus Medicago \
+           --species truncatula \
+           --strain A17_HM341 \
+           --gene-gff <(wget -O - https://data.legumeinfo.org/Medicago/truncatula/annotations/A17_HM341.gnm4.ann2.G3ZY/medtr.A17_HM341.gnm4.ann2.G3ZY.gene_models_main.gff3.gz | zcat | awk 'BEGIN {FS="\t"} $3=="gene" {print}') \
+           --gfa https://data.legumeinfo.org/Medicago/truncatula/annotations/A17_HM341.gnm4.ann2.G3ZY/medtr.A17_HM341.gnm4.ann2.G3ZY.legfed_v1_0.M65K.gfa.tsv.gz \
+           --chromosome-gff /dev/stdin
+
 echo "phavu.G19833.gnm1.ann1"
 wget -O - https://data.legumeinfo.org/Phaseolus/vulgaris/genomes/G19833.gnm1.zBnF/phavu.G19833.gnm1.zBnF.genome_main.fna.gz.fai |
   awk ' BEGIN { FS=OFS="\t"; print "##gff-version 3" }
