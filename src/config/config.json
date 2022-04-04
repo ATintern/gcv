@@ -50,36 +50,36 @@
         "functionName": "taxonChroma.get"
       },
       "microSearch": {
-        "type": "GRPC",
-        "url": "https://gcv.legumeinfo.org/gcv/microservices/micro-synteny-search/grpc-web"
+        "type": "POST",
+        "url": "https://gcv-microservices.lis.ncgr.org/lis/micro-synteny-search"
       },
       "geneLinks": {
         "type": "GET",
-        "url": "https://legumeinfo.org/gene_links/"
+        "url": "https://legacy.legumeinfo.org/gene_links/"
       },
       "familyTreeLink": {
         "type": "GET",
-        "url": "https://legumeinfo.org/chado_gene_phylotree_v2?family="
+        "url": "https://legacy.legumeinfo.org/chado_gene_phylotree_v2?family="
       },
       "chromosome": {
-        "type": "GRPC",
-        "url": "https://gcv.legumeinfo.org/gcv/microservices/chromosome/grpc-web"
+        "type": "GET",
+        "url": "https://gcv-microservices.lis.ncgr.org/lis/chromosome"
       },
       "genes": {
         "type": "POST",
-        "url": "https://gcv.legumeinfo.org/gcv/microservices/genes"
+        "url": "https://gcv-microservices.lis.ncgr.org/lis/genes"
       },
       "blocks": {
-        "type": "GRPC",
-        "url": "https://gcv.legumeinfo.org/gcv/microservices/macro-synteny-blocks/grpc-web"
+        "type": "POST",
+        "url": "https://gcv-microservices.lis.ncgr.org/lis/macro-synteny-blocks"
       },
       "search": {
-        "type": "GRPC",
-        "url": "https://gcv.legumeinfo.org/gcv/microservices/search/grpc-web"
+        "type": "GET",
+        "url": "https://gcv-microservices.lis.ncgr.org/lis/search"
       },
       "region": {
-        "type": "GRPC",
-        "url": "https://gcv.legumeinfo.org/gcv/microservices/chromosome-region/grpc-web"
+        "type": "GET",
+        "url": "https://gcv-microservices.lis.ncgr.org/lis/chromosome-region"
       }
     }
   ]
