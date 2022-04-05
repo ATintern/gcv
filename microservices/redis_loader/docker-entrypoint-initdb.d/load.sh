@@ -3,6 +3,7 @@
 set -o errexit -o pipefail
 
 #cannot get this to work via the pipe strategy due apparently to wget terminating the connection prematurely and consistently when the wget is performed in a pipeline as all others. For whtever reason, it seems to work this way- weird!
+#NB: thought I could get rid of this when the gnm2 for this came along, but it will have to wait until we have new trees
 echo "cajca.ICPL87119.gnm1.ann1"
 wget https://data.legumeinfo.org/Cajanus/cajan/annotations/ICPL87119.gnm1.ann1.Y27M/cajca.ICPL87119.gnm1.ann1.Y27M.gene_models_main.gff3.gz
 wget -O - https://data.legumeinfo.org/Cajanus/cajan/genomes/ICPL87119.gnm1.SBGP/cajca.ICPL87119.gnm1.SBGP.genome_main.fna.gz.fai |
@@ -82,6 +83,21 @@ wget -O - https://data.legumeinfo.org/Arachis/ipaensis/genomes/K30076.gnm1.bXJ8/
            --strain K30076 \
            --gene-gff <(wget -O - https://data.legumeinfo.org/Arachis/ipaensis/annotations/K30076.gnm1.ann1.J37m/araip.K30076.gnm1.ann1.J37m.gene_models_main.gff3.gz | zcat | awk 'BEGIN {FS="\t"} $3=="gene" {print}') \
            --gfa https://data.legumeinfo.org/Arachis/ipaensis/annotations/K30076.gnm1.ann1.J37m/araip.K30076.gnm1.ann1.J37m.legfed_v1_0.M65K.gfa.tsv.gz \
+           --chromosome-gff /dev/stdin
+
+echo "cajca.ICPL87119.gnm2.ann1"
+wget -O - https://data.legumeinfo.org/Cajanus/cajan/genomes/ICPL87119.gnm2.KL9M/cajca.ICPL87119.gnm2.KL9M.genome_main.fna.gz.fai |
+  awk ' BEGIN { FS=OFS="\t"; print "##gff-version 3" }
+        {
+            print $1, ".", $1 ~ /chr[0-9][0-9]/ ? "chromosome" : "supercontig", 
+                   1, $2, ".", ".", ".", "ID=" $1 ";" "Name=" $1 
+        }' | 
+    python -u -m redis_loader --load-type append gff \
+           --genus Cajanus \
+           --species cajan \
+           --strain ICPL87119 \
+           --gene-gff <(wget -O - https://data.legumeinfo.org/Cajanus/cajan/annotations/ICPL87119.gnm2.ann1.L3ZH/cajca.ICPL87119.gnm2.ann1.L3ZH.gene_models_main.gff3.gz | zcat | awk 'BEGIN {FS="\t"} $3=="gene" {print}') \
+           --gfa https://data.legumeinfo.org/Cajanus/cajan/annotations/ICPL87119.gnm2.ann1.L3ZH/cajca.ICPL87119.gnm2.ann1.L3ZH.legfed_v1_0.M65K.gfa.tsv.gz \
            --chromosome-gff /dev/stdin
 
 echo "cicar.CDCFrontier.gnm1.ann1"
@@ -367,6 +383,21 @@ wget -O - https://data.legumeinfo.org/Trifolium/pratense/genomes/MilvusB.gnm2.gN
            --strain MilvusB \
            --gene-gff <(wget -O - https://data.legumeinfo.org/Trifolium/pratense/annotations/MilvusB.gnm2.ann1.DFgp/tripr.MilvusB.gnm2.ann1.DFgp.gene_models_main.gff3.gz | zcat | awk 'BEGIN {FS="\t"} $3=="gene" {print}') \
            --gfa https://data.legumeinfo.org/Trifolium/pratense/annotations/MilvusB.gnm2.ann1.DFgp/tripr.MilvusB.gnm2.ann1.DFgp.legfed_v1_0.M65K.gfa.tsv.gz \
+           --chromosome-gff /dev/stdin
+
+echo "trisu.Daliak.gnm2.ann1"
+wget -O - https://data.legumeinfo.org/Trifolium/subterraneum/genomes/Daliak.gnm2.VJZB/trisu.Daliak.gnm2.VJZB.genome_main.fna.gz.fai |
+  awk ' BEGIN { FS=OFS="\t"; print "##gff-version 3" }
+        {
+            print $1, ".", $1 ~ /Chr/ ? "chromosome" : "supercontig", 
+                   1, $2, ".", ".", ".", "ID=" $1 ";" "Name=" $1 
+        }' | 
+    python -u -m redis_loader --load-type append gff \
+           --genus Trifolium \
+           --species subterraneum \
+           --strain Daliak \
+           --gene-gff <(wget -O - https://data.legumeinfo.org/Trifolium/subterraneum/annotations/Daliak.gnm2.ann1.MFKF/trisu.Daliak.gnm2.ann1.MFKF.gene_models_main.gff3.gz | zcat | awk 'BEGIN {FS="\t"} $3=="gene" {print}') \
+           --gfa https://data.legumeinfo.org/Trifolium/subterraneum/annotations/Daliak.gnm2.ann1.MFKF/trisu.Daliak.gnm2.ann1.MFKF.legfed_v1_0.M65K.gfa.tsv.gz \
            --chromosome-gff /dev/stdin
 
 echo "vigan.Gyeongwon.gnm3.ann1"
