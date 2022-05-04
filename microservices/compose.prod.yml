@@ -39,6 +39,7 @@ services:
       test: "redis-cli ping"
     expose:
       - "6379"
+    command: redis-server --loadmodule /usr/lib/redis/modules/redisearch.so --save ''
     # use anonymous volume so "docker compoose up --renew-anon-volumes" in
     # deployment github action workflow causes it to be recreated
     volumes:
@@ -149,7 +150,7 @@ services:
       - "81"
 
   macro_synteny_blocks:
-    image: ghcr.io/legumeinfo/microservices-macro_synteny_blocks:1.0.0
+    image: ghcr.io/legumeinfo/microservices-macro_synteny_blocks:1.1.0
     depends_on:
       redisearch:
         condition: service_healthy
@@ -200,7 +201,7 @@ services:
       - "traefik.http.routers.micro-synteny-search.entrypoints=web"
 
   pairwise_macro_synteny_blocks:
-    image: ghcr.io/legumeinfo/microservices-pairwise_macro_synteny_blocks:1.0.0
+    image: ghcr.io/legumeinfo/microservices-pairwise_macro_synteny_blocks:1.1.0
     depends_on:
       redisearch:
         condition: service_healthy
